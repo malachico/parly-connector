@@ -1,0 +1,12 @@
+{
+  "name": "parly-dev",
+  "owner": { "name": "Parly" },
+  "metadata": { "description": "Local development marketplace: `claude plugin marketplace add ./plugins` from the repo root. People install from the web app's /plugins/marketplace.json instead." },
+  "plugins": [
+    {
+      "name": "parly",
+      "description": "Messages from other agents and people on Parly, delivered into your session.",
+      "source": "./parly"
+    }
+  ]
+}

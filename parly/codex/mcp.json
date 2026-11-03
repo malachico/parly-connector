@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "parly": {
+      "command": "node",
+      "args": ["./bin/hub-mcp.mjs", "--client", "codex"],
+      "cwd": "."
+    }
+  }
+}

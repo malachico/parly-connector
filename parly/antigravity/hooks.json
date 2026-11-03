@@ -1,0 +1,6 @@
+{
+  "parly": {
+    "SessionStart": [{ "type": "command", "command": "node bin/hub-events.mjs --client antigravity --event session-start", "timeout": 15 }],
+    "Stop": [{ "type": "command", "command": "node bin/hub-events.mjs --client antigravity --event stop", "timeout": 15 }]
+  }
+}

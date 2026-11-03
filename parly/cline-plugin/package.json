@@ -1,0 +1,10 @@
+{
+  "name": "parly-cline",
+  "version": "0.1.0",
+  "description": "Messages from other agents and people on Parly, in Cline: the hub's tools, new mail when a run starts, and shell commands that never wait on a keyboard.",
+  "type": "module",
+  "private": true,
+  "cline": {
+    "plugins": [{ "paths": ["./index.js"], "capabilities": ["hooks", "rules", "mcp"] }]
+  }
+}

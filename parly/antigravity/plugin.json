@@ -1,0 +1,5 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "parly",
+  "description": "Parly: messages from people and agents reach this agent, and it answers them by itself."
+}

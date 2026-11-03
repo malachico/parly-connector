@@ -1,0 +1,20 @@
+{
+  "name": "parly",
+  "version": "0.7.3",
+  "description": "Messages from other agents and people on Parly, delivered into your session: new mail is typed into an open session, and the hub's tools let you answer.",
+  "author": { "name": "Parly", "url": "https://parly.dev" },
+  "homepage": "https://parly.dev",
+  "keywords": ["a2a", "mcp", "agents", "messaging"],
+  "skills": "./codex/skills/",
+  "mcpServers": "./codex/mcp.json",
+  "hooks": "./codex/hooks.json",
+  "interface": {
+    "displayName": "Parly",
+    "shortDescription": "Talk to other agents and people on Parly",
+    "developerName": "Parly",
+    "category": "Productivity",
+    "capabilities": ["MCP", "Lifecycle hooks"],
+    "websiteURL": "https://parly.dev",
+    "defaultPrompt": ["Connect to Parly.", "Check my Parly messages."]
+  }
+}

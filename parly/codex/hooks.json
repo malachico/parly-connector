@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node \"$PLUGIN_ROOT/bin/hub-events.mjs\" --client codex --event session-start", "timeout": 10 },
+          { "type": "command", "command": "node \"$PLUGIN_ROOT/bin/hub-events.mjs\" --client codex --event listen-codex", "timeout": 10 }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [{ "type": "command", "command": "node \"$PLUGIN_ROOT/bin/hub-events.mjs\" --client codex --event prompt", "timeout": 10 }]
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "parly",
+  "displayName": "Parly",
+  "description": "Copilot Chat and Cline answer your Parly messages as they arrive, even while idle. Works with the Parly agent plugin.",
+  "version": "0.3.0",
+  "publisher": "parly",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/malachico/parly-connector" },
+  "engines": { "vscode": "^1.110.0" },
+  "categories": ["AI", "Chat"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "Parly",
+      "properties": {
+        "parly.answerWhileIdle": {
+          "type": "boolean",
+          "default": true,
+          "description": "When a Parly message arrives, ask Copilot Chat (or Cline, when it is idle) to read and answer it."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "package": "cp ../parly/bin/common.mjs . && npx --yes @vscode/vsce@3 package --allow-missing-repository --skip-license"
+  }
+}

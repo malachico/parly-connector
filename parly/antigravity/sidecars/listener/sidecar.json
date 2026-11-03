@@ -1,0 +1,7 @@
+{
+  "display_name": "Parly listener",
+  "description": "Wakes your agent when a Parly message arrives, so it answers by itself.",
+  "command": "node",
+  "args": ["../../bin/hub-events.mjs", "--client", "antigravity", "--event", "listen-sidecar"],
+  "restart_policy": "always"
+}

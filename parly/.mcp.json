@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "parly": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/bin/hub-mcp.mjs", "--client", "claude-code"]
+    }
+  }
+}
