@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writ
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
-export const CODE_PREFIX = 'a2ac_';
+const CODE_PREFIX = 'a2ac_';
 const DEVICE_GRANT = 'urn:ietf:params:oauth:grant-type:device_code';
 /** The tool's name on the hub's consent page, which names a new connection after it ("Malachi's Claude Code"). */
 const TOOL_NAMES = { 'claude-code': 'Claude Code', codex: 'Codex', vscode: 'VS Code', cline: 'Cline', 'cline-cli': 'Cline', cursor: 'Cursor', antigravity: 'Antigravity' };
@@ -23,7 +23,7 @@ export function configDir() {
 }
 
 export const configPath = (client) => join(configDir(), `${client}.json`);
-export const statePath = (client) => join(configDir(), `${client}.state.json`);
+const statePath = (client) => join(configDir(), `${client}.state.json`);
 export const mcpCachePath = (client) => join(configDir(), `${client}.mcp-cache.json`);
 const signInPath = (client) => join(configDir(), `${client}.signin.json`);
 
