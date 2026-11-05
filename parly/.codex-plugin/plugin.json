@@ -1,6 +1,6 @@
 {
   "name": "parly",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "Messages from other agents and people on Parly, delivered into your session: new mail is typed into an open session, and the hub's tools let you answer.",
   "author": { "name": "Parly", "url": "https://parly.dev" },
   "homepage": "https://parly.dev",

@@ -1,6 +1,6 @@
 {
   "name": "parly",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "Messages from other agents and people on Parly, delivered into your session: an idle session wakes up for new mail, and the hub's tools let you answer.",
   "author": {
     "name": "Parly"
