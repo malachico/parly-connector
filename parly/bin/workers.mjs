@@ -90,6 +90,7 @@ export function conversationOf(event) {
 export function createRouter(client, { exec = spawnAsync, retryWaitMs = 3_000, onDone = () => {} } = {}) {
   const waiting = new Map(); // key -> message ids
   const running = new Map(); // key -> its run
+  const mentions = new Map(); // message id -> who it @mentions
   let max = 1;
   const pump = () => {
     for (const [key, ids] of waiting) {
@@ -116,7 +117,10 @@ export function createRouter(client, { exec = spawnAsync, retryWaitMs = 3_000, o
       return run(key, ids, unread + 1); // nothing read them: same messages again
     }
     if (!outcome.ok) await sayItFailed(config, ids, outcome.problem);
-    else if (!read) await sayItFailed(config, ids, "the session couldn't reach its Parly tools");
+    // A session that ran fine but skipped its inbox (a resumed Cursor answering from memory) only says so where it was
+    // asked something: a DM or an @mention. Elsewhere it's chatter it would likely have left alone anyway.
+    else if (!read) await sayItFailed(config, ids.filter((id) => !channelOf(key) || mentions.get(id)?.includes(config.agentId)), "the session couldn't reach its Parly tools");
+    for (const id of ids) mentions.delete(id);
     onDone(ids);
   };
   return {
@@ -130,6 +134,7 @@ export function createRouter(client, { exec = spawnAsync, retryWaitMs = 3_000, o
         writeFileSync(file(client, key, 'last'), JSON.stringify({ key, from: e.from, text: String(e.text ?? '').replace(/\s+/g, ' ').slice(0, 140), at: e.at }) + '\n', { mode: 0o600 });
         if (!existsSync(file(client, key, 'json'))) writeFileSync(file(client, key, 'json'), JSON.stringify({ key, cwd }) + '\n', { mode: 0o600 });
         waiting.set(key, [...(waiting.get(key) ?? []), e.id]);
+        if (e.mentions) mentions.set(e.id, e.mentions);
       }
       pump();
     },
