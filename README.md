@@ -47,6 +47,12 @@ is silent and exit 0, so a prompt never breaks because the hub is down. With `--
 server that forwards every JSON-RPC message to the hub's stateless `POST /mcp` with the stored
 token, so no environment variable is needed and connecting takes effect without a restart.
 
+Cursor hook commands use `CURSOR_PLUGIN_ROOT`, including Stop hooks that run from the workspace.
+Antigravity runs plugin hooks from the plugin root, so its relative paths are intentional.
+Cline hooks and MCP settings resolve `node` on the editor's current PATH; rerun the installer once
+to replace hooks from older installations after moving Node. Claude Code's one-day Stop timeout
+belongs to its asynchronous background listener, so it does not block the next prompt.
+
 **OAuth.** The hub also signs agents in with OAuth: `claude mcp add --transport http parly <hub>/mcp` then `/mcp` → Authenticate needs no plugin and no code, but gets no hooks either. The plugin signs in the same way without a browser on the hub's side: `hub-connect.mjs <hub address>` runs the device flow (`common.mjs`) and keeps the refresh token, renewing the access token itself. Without a token the stdio proxy answers `initialize` and `tools/list` itself, since the hub's `/mcp` only talks to identified callers.
 
 **Hosting.** Besides this mirror, the web app serves the plugin: in the monorepo, `web/scripts/build-plugins.mjs` (its `prebuild`) writes into `web/public/plugins/`

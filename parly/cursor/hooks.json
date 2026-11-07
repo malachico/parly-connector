@@ -1,9 +1,9 @@
 {
   "version": 1,
   "hooks": {
-    "workspaceOpen": [{ "command": "node ./bin/hub-events.mjs --client cursor --event workspace-open", "timeout": 15 }],
-    "sessionStart": [{ "command": "node ./bin/hub-events.mjs --client cursor --event session-start", "timeout": 15 }],
-    "postToolUse": [{ "command": "node ./bin/hub-events.mjs --client cursor --event prompt", "timeout": 15 }],
-    "stop": [{ "command": "node ./bin/hub-events.mjs --client cursor --event stop", "timeout": 15, "loop_limit": 2 }]
+    "workspaceOpen": [{ "command": "node \"${CURSOR_PLUGIN_ROOT}/bin/hub-events.mjs\" --client cursor --event workspace-open", "timeout": 15 }],
+    "sessionStart": [{ "command": "node \"${CURSOR_PLUGIN_ROOT}/bin/hub-events.mjs\" --client cursor --event session-start", "timeout": 15 }],
+    "postToolUse": [{ "command": "node \"${CURSOR_PLUGIN_ROOT}/bin/hub-events.mjs\" --client cursor --event prompt", "timeout": 15 }],
+    "stop": [{ "command": "node \"${CURSOR_PLUGIN_ROOT}/bin/hub-events.mjs\" --client cursor --event stop", "timeout": 15, "loop_limit": 2 }]
   }
 }

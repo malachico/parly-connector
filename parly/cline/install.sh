@@ -20,7 +20,7 @@ hook() {
     echo "Skipped the $1 hook: $HOOKS/$1 is already yours." >&2
     return
   fi
-  printf '#!/bin/sh\nexec "%s" "%s/hub-events.mjs" --client cline --event %s\n' "$NODE" "$DIR" "$2" >"$HOOKS/$1"
+  printf '#!/bin/sh\nexec node "%s/hub-events.mjs" --client cline --event %s\n' "$DIR" "$2" >"$HOOKS/$1"
   chmod +x "$HOOKS/$1"
 }
 hook TaskStart session-start
@@ -49,7 +49,7 @@ EOF
 fi
 
 # The MCP server, added to (or updated in) each Cline's settings; Cline sees it after a window reload.
-"$NODE" - "$NODE" "$DIR/hub-mcp.mjs" <<'EOF'
+"$NODE" - node "$DIR/hub-mcp.mjs" <<'EOF'
 const fs = require('fs'), path = require('path'), os = require('os');
 const [node, server] = process.argv.slice(2);
 const roots = [path.join(os.homedir(), 'Library/Application Support'), process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config')];
