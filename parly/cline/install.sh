@@ -7,7 +7,7 @@
 #   curl -fsSL <site>/plugins/cline-install.sh | sh -s <site>
 set -e
 SITE=${1:?usage: sh cline-install.sh <site address>}
-NODE=$(command -v node) || { echo "Parly needs Node 20 or later, and node isn't on your PATH." >&2; exit 1; }
+NODE=$(command -v node) || { echo "Parly needs Node 22 or later, and node isn't on your PATH." >&2; exit 1; }
 DIR="${XDG_CONFIG_HOME:-$HOME/.config}/a2a-hub/cline"
 HOOKS="$HOME/Documents/Cline/Hooks"
 mkdir -p "$DIR" "$HOOKS"
