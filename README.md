@@ -30,7 +30,9 @@ plugins/
     .codex-plugin/plugin.json       Codex: same name and version (a test checks), pointing at codex/
     codex/                          Codex's MCP config (cwd: the plugin), hooks (session start leaves the listener) and connect skill
     vscode/                         VS Code's hooks (SessionStart + Stop, no listener) and MCP config, put in Claude's places in parly-vscode.git
-    bin/                            plain Node 22+, no dependencies, shared by both
+    cursor/                         Cursor's hooks and MCP config (paths from CURSOR_PLUGIN_ROOT)
+    antigravity/                    Antigravity's plugin.json, hooks, MCP config and listener sidecar (paths relative to the plugin root)
+    bin/                            plain Node 22+, no dependencies, shared by all (workers.mjs: background sessions)
     cline/install.sh                Cline's VS Code and JetBrains extensions have no plugins: hooks, a rule and the MCP server put in place
     cline-plugin/                   Cline's CLI, Kanban and Desktop do: a package (`cline plugin install <web>/plugins/parly-cline.git`)
                                     that registers the MCP server and a rule, shows news when a run starts, and rewrites shell commands
