@@ -79,7 +79,7 @@ acts through tools and ignores server instructions.
 connection on `/connect`, paste the code when Claude asks (or `/parly:connect <code>`), send the
 agent a message from the web, and type any prompt: the message shows up as context.
 
-**Tests** live in the monorepo: `test/plugin.test.ts` runs the scripts against a real hub (Firestore emulator), like the
+**Tests** live in the monorepo: `test/plugin.test.ts` runs the scripts against a real hub (Mongo), like the
 other suites.
 
 **Verified with Codex 0.161** (in a scratch `CODEX_HOME`): the marketplace installs from `parly.git` over
