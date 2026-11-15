@@ -68,6 +68,29 @@ export function workersFor(client, config) {
 const dir = (client) => join(configDir(), `${client}.workers`);
 const id = (key) => createHash('sha256').update(key).digest('hex').slice(0, 16);
 const file = (client, key, ext) => join(dir(client), `${id(key)}.${ext}`);
+// One folder per conversation for its worktrees, under the session's own cwd (writable in every permission mode),
+// one subdir per repo inside it. Deterministic from the key, so the hub can clean up what a turn left (cleanupWorktrees).
+export const worktreeDir = (meta) => join(meta.cwd || process.cwd(), '.parly-worktrees', id(meta.key));
+
+/** After a run, remove this conversation's worktrees that are clean and on a branch. Leaves dirty ones and detached HEADs
+ *  (removing a detached HEAD would orphan its commits). Plain `git worktree remove` — no --force — so git refuses anything
+ *  it still sees as changed. A clean removal also deletes the tree's gitignored files (node_modules, .env). Best-effort. */
+export function cleanupWorktrees(meta) {
+  let entries;
+  try {
+    entries = readdirSync(worktreeDir(meta), { withFileTypes: true });
+  } catch {
+    return; // no worktree folder for this conversation: nothing this turn made one
+  }
+  for (const e of entries) {
+    if (!e.isDirectory()) continue;
+    const wt = join(worktreeDir(meta), e.name);
+    const git = (...a) => spawnSync('git', ['-C', wt, ...a], { encoding: 'utf8' });
+    if (git('symbolic-ref', '-q', 'HEAD').status !== 0) continue; // detached HEAD: leave it, removal would orphan commits
+    if (git('status', '--porcelain').stdout?.trim()) continue; // dirty: leave it
+    git('worktree', 'remove', wt);
+  }
+}
 
 /** Left by hub-mcp when this conversation's inbox was read. Cleared before each run. */
 export function markRead(client, key) {
@@ -121,6 +144,7 @@ export function createRouter(client, { exec = spawnAsync, retryWaitMs = 3_000, o
     // asked something: a DM or an @mention. Elsewhere it's chatter it would likely have left alone anyway.
     else if (!read) await sayItFailed(config, ids.filter((id) => !channelOf(key) || mentions.get(id)?.includes(config.agentId)), "the session couldn't reach its Parly tools");
     for (const id of ids) mentions.delete(id);
+    cleanupWorktrees(meta); // remove this turn's clean worktrees; only runs on the terminal turn (busy/unread-retry return above)
     onDone(ids);
   };
   return {
@@ -185,12 +209,14 @@ export function otherSessions(client, key, now = Date.now()) {
 /** One turn of the conversation's session; resumes the one it had. Updates `meta.session`. */
 export async function runSession(client, meta, settings, name, logFile, exec = spawnAsync) {
   const others = otherSessions(client, meta.key);
+  const wt = worktreeDir(meta);
   const prompt =
     `You are ${name} on Parly, in a session of your own for one conversation: ${meta.key}. ` +
     `Call check_inbox with conversation "${meta.key}" (only that conversation: the others have sessions of their own), ` +
     'read the thread if you need more, and answer with reply(messageId) where a message asks you something. ' +
     'Never call check_inbox without conversation, wait_for_message or wait_for_events. ' +
-    'If the work means changing files in a git repository, make a new git worktree for it rather than editing the main checkout. ' +
+    `Only a turn that actually changes a git repository's files needs a worktree; a read-only or answer-only turn makes none. ` +
+    `When you do change a repo's files, work in a worktree at ${wt}/<repo-name> rather than the main checkout: "git worktree add" it with "-b <branch>" the first time, and if that path is gone on a later turn re-add the worktree on its existing branch ("git worktree add <path> <branch>", no -b). ` +
     'Before using a skill or process Parly lists, load it with get_skill(id). ' +
     'Stop once you have answered.' +
     (others.length
