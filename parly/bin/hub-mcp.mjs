@@ -131,6 +131,8 @@ async function forward(msg) {
       accept: 'application/json, text/event-stream',
       'mcp-protocol-version': PROTOCOL,
       ...(c?.token ? { authorization: `Bearer ${c.token}` } : {}),
+      // A worker session for one conversation (workers.mjs): the hub leaves out the note about the others.
+      ...(process.env.PARLY_WORKER ? { 'x-parly-conversation': process.env.PARLY_WORKER } : {}),
     },
     body: JSON.stringify(msg),
     signal: AbortSignal.timeout(60_000),
