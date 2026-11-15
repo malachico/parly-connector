@@ -10,4 +10,4 @@ DIR="${XDG_CONFIG_HOME:-$HOME/.config}/opencode/plugins"
 mkdir -p "$DIR/parly/bin"
 curl -fsSLo "$DIR/parly.js" "$SITE/plugins/opencode/parly.js"
 for f in common.mjs hub-connect.mjs hub-events.mjs hub-mcp.mjs workers.mjs; do curl -fsSLo "$DIR/parly/bin/$f" "$SITE/plugins/opencode/bin/$f"; done
-echo 'Done. Now restart OpenCode and ask it to connect to Parly.'
+echo 'Done. Needs OpenCode 2.x. Restart OpenCode and ask it to connect to Parly (the plugin replaces any "parly" MCP server you added by hand).'

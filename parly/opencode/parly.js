@@ -1,9 +1,10 @@
-// Parly for OpenCode: the hub's MCP server, new hub messages in front of the model with each prompt, and an idle
-// session woken when a message arrives.
+// Parly for OpenCode 2.x: the hub's MCP server, new hub messages added to each prompt, and an idle session woken
+// when a message arrives.
 //
 //   curl -fsSL <site>/plugins/opencode-install.sh | sh -s <site>
 //
 // The plugin runs in OpenCode's own process, so process.pid is OpenCode's and the listener ends when OpenCode does.
+// ponytail: OpenCode 2.x plugin format only (export default { id, setup }); 1.x loaded named function exports.
 import { execFile, spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -27,9 +28,8 @@ function hubNews(event) {
   });
 }
 
-export const ParlyPlugin = async ({ client }) => {
+async function setup({ mcp, session }) {
   const started = new Set(); // sessions that have had their session-start news
-  const news = new Map(); // sessionID → hub news for this turn's system prompt
   let listener; // the background wait for news while a session is idle
 
   function stopListening() {
@@ -46,31 +46,23 @@ export const ParlyPlugin = async ({ client }) => {
     child.on('exit', (code) => {
       if (listener === child) listener = undefined;
       // 2: news (on stderr). Anything else: signed out, or another OpenCode owns the news.
-      if (code === 2 && err.trim()) client.session.promptAsync({ path: { id: sessionID }, body: { parts: [{ type: 'text', text: err.trim() }] } }).catch(() => {});
+      if (code === 2 && err.trim()) session.prompt({ sessionID, text: err.trim() }).catch(() => {});
     });
     listener = child;
   }
 
-  return {
-    // The hub's tools, through the same stdio bridge the other plugins use; its `connect` tool signs in.
-    async config(config) {
-      config.mcp ??= {};
-      config.mcp.parly ??= { type: 'local', command: ['node', join(bin, 'hub-mcp.mjs'), '--client', CLIENT], enabled: true };
-    },
-    async 'chat.message'({ sessionID }) {
-      stopListening();
-      const text = await hubNews(started.has(sessionID) ? 'prompt' : 'session-start');
-      started.add(sessionID);
-      if (text) news.set(sessionID, text);
-      else news.delete(sessionID);
-    },
-    // ponytail: news rides in the system prompt for the turn it arrived with, not in the saved history; add it as a message part if later turns need it
-    async 'experimental.chat.system.transform'({ sessionID }, output) {
-      const text = sessionID && news.get(sessionID);
-      if (text) output.system.push(text);
-    },
-    async event({ event }) {
-      if (event.type === 'session.idle') listen(event.properties.sessionID);
-    },
-  };
-};
+  // The hub's tools, through the same stdio bridge the other plugins use; its `connect` tool signs in and saves the
+  // token the listener needs. It replaces a hand-added remote "parly" server, whose OAuth sign-in the listener can't use.
+  await mcp.transform((servers) => servers.set('parly', { type: 'local', command: ['node', join(bin, 'hub-mcp.mjs'), '--client', CLIENT] }));
+  // ponytail: news is appended to the prompt text, so it stays in the saved history; move it to the "context" hook if that gets noisy
+  await session.hook('prompt', async (input) => {
+    stopListening();
+    const text = await hubNews(started.has(input.sessionID) ? 'prompt' : 'session-start');
+    started.add(input.sessionID);
+    if (text) input.prompt.text += `\n\n${text}`;
+  });
+  await session.hook('experimental.idle', ({ sessionID }) => listen(sessionID));
+  return stopListening;
+}
+
+export default { id: 'parly', setup };
