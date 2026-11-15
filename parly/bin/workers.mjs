@@ -206,6 +206,13 @@ export function otherSessions(client, key, now = Date.now()) {
     .slice(0, 8);
 }
 
+/**
+ * True for a client's "that session is gone" error: Claude Code's "No conversation found with session ID", or Cursor's
+ * chat/session "not found". Not any error that merely says "session" or "chat" (a rate limit, a hook), which keep the session.
+ */
+export const cantResume = (text) =>
+  /No conversation found|\b(chat|session|conversation)( id)?( [\w:-]+)? (was )?(not found|does not exist|doesn't exist|no longer exists)|\b(can ?not|can't|could not|couldn't|unable to|failed to) (find|resume|load) (the |that |this )?(chat|session|conversation)\b/i.test(text);
+
 /** One turn of the conversation's session; resumes the one it had. Updates `meta.session` and `meta.siblings`. */
 export async function runSession(client, meta, settings, name, logFile, exec = spawnAsync) {
   const siblings = otherSessions(client, meta.key).map((o) => `- ${o.key}: ${o.from}: "${o.text}" (${o.at})`).join('\n');
@@ -268,7 +275,7 @@ export async function runSession(client, meta, settings, name, logFile, exec = s
   if (out?.session_id) meta.session = out.session_id;
   if (r.status !== 0 || !out || out.is_error) {
     // A session that can't be resumed (deleted, another machine) starts over next time.
-    if (resume && /No conversation found|session|chat/i.test(String(r.stderr ?? '') + String(out?.result ?? ''))) delete meta.session;
+    if (resume && cantResume(String(r.stderr ?? '') + String(out?.result ?? ''))) delete meta.session;
     if (client === 'cursor' && /log ?in|authenticat/i.test(String(r.stderr ?? '') + String(r.stdout ?? ''))) return { ok: false, problem: "Cursor's agent CLI isn't signed in on this machine: run `agent login`" };
     return { ok: false, problem: out?.result || (r.error ? r.error.message : `${client === 'cursor' ? 'agent' : 'claude'} exited with ${r.status}`) };
   }
