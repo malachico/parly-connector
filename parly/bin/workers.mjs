@@ -206,12 +206,16 @@ export function otherSessions(client, key, now = Date.now()) {
     .slice(0, 8);
 }
 
-/** One turn of the conversation's session; resumes the one it had. Updates `meta.session`. */
+/** One turn of the conversation's session; resumes the one it had. Updates `meta.session` and `meta.siblings`. */
 export async function runSession(client, meta, settings, name, logFile, exec = spawnAsync) {
-  const others = otherSessions(client, meta.key);
+  const siblings = otherSessions(client, meta.key).map((o) => `- ${o.key}: ${o.from}: "${o.text}" (${o.at})`).join('\n');
   const wt = worktreeDir(meta);
-  const prompt =
-    `You are ${name} on Parly, in a session of your own for one conversation: ${meta.key}. ` +
+  // The full instructions go in a session's first turn only; a resumed one already has them, so it gets a nudge,
+  // plus the other sessions' list when that changed since its last good turn.
+  const prompt = meta.session
+    ? `New messages in ${meta.key}: call check_inbox with conversation "${meta.key}" and answer as before.` +
+      (siblings && siblings !== meta.siblings ? `\n\nYour other sessions are now on these:\n${siblings}` : '')
+    : `You are ${name} on Parly, in a session of your own for one conversation: ${meta.key}. ` +
     `Call check_inbox with conversation "${meta.key}" (only that conversation: the others have sessions of their own), ` +
     'read the thread if you need more, and answer with reply(messageId) where a message asks you something. ' +
     'Never call check_inbox without conversation, wait_for_message or wait_for_events. ' +
@@ -219,9 +223,8 @@ export async function runSession(client, meta, settings, name, logFile, exec = s
     `When you do change a repo's files, work in a worktree at ${wt}/<repo-name> rather than the main checkout: "git worktree add" it with "-b <branch>" the first time, and if that path is gone on a later turn re-add the worktree on its existing branch ("git worktree add <path> <branch>", no -b). ` +
     'Before using a skill or process Parly lists, load it with get_skill(id). ' +
     'Stop once you have answered.' +
-    (others.length
-      ? "\n\nYour other sessions (you, in other conversations) are on these; if this conversation touches one, read it (read_thread, or read the DM) before acting, and don't redo or contradict its work:\n" +
-        others.map((o) => `- ${o.key}: ${o.from}: "${o.text}" (${o.at})`).join('\n')
+    (siblings
+      ? "\n\nYour other sessions (you, in other conversations) are on these; if this conversation touches one, read it (read_thread, or read the DM) before acting, and don't redo or contradict its work:\n" + siblings
       : '');
   const env = { ...process.env, PARLY_WORKER: meta.key };
   const log = (text) => appendFileSync(logFile, `--- ${new Date().toISOString()}\n${text}\n`, { mode: 0o600 });
@@ -241,6 +244,7 @@ export async function runSession(client, meta, settings, name, logFile, exec = s
     if (r.status !== 0 || failed || !lines.some((l) => l.type === 'turn.completed')) {
       return { ok: false, problem: failed?.error?.message || failed?.message || (r.error ? r.error.message : `codex exited with ${r.status}`) };
     }
+    meta.siblings = siblings;
     return { ok: true };
   }
   const resume = Boolean(meta.session);
@@ -268,6 +272,7 @@ export async function runSession(client, meta, settings, name, logFile, exec = s
     if (client === 'cursor' && /log ?in|authenticat/i.test(String(r.stderr ?? '') + String(r.stdout ?? ''))) return { ok: false, problem: "Cursor's agent CLI isn't signed in on this machine: run `agent login`" };
     return { ok: false, problem: out?.result || (r.error ? r.error.message : `${client === 'cursor' ? 'agent' : 'claude'} exited with ${r.status}`) };
   }
+  meta.siblings = siblings;
   return { ok: true };
 }
 
