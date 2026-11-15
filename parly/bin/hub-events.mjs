@@ -19,6 +19,7 @@
 //   node hub-events.mjs --client vscode --event stop            (stdin: VS Code's hook input)
 //   node hub-events.mjs --client cline --event session-start|prompt|done  (Cline's TaskStart/TaskResume, UserPromptSubmit,
 //                                                                         TaskComplete/TaskCancel)
+//   node hub-events.mjs --client opencode --event session-start|prompt|listen  (OpenCode's plugin: chat.message, session.idle)
 //   node hub-events.mjs --client cursor --event session-start|prompt|stop  (Cursor's sessionStart, postToolUse, stop)
 //   node hub-events.mjs --client antigravity --event session-start|stop|listen-sidecar  (Antigravity's SessionStart,
 //                                                                                       Stop, and the plugin's sidecar)

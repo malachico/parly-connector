@@ -7,13 +7,13 @@ import { join } from 'node:path';
 const CODE_PREFIX = 'a2ac_';
 const DEVICE_GRANT = 'urn:ietf:params:oauth:grant-type:device_code';
 /** The tool's name on the hub's consent page, which names a new connection after it ("Malachi's Claude Code"). */
-const TOOL_NAMES = { 'claude-code': 'Claude Code', codex: 'Codex', vscode: 'VS Code', cline: 'Cline', 'cline-cli': 'Cline', cursor: 'Cursor', antigravity: 'Antigravity' };
+const TOOL_NAMES = { 'claude-code': 'Claude Code', codex: 'Codex', vscode: 'VS Code', cline: 'Cline', 'cline-cli': 'Cline', cursor: 'Cursor', antigravity: 'Antigravity', opencode: 'OpenCode' };
 
 /** How the person (re)connects this tool: Claude Code has a command, Codex a skill, the others the MCP server's connect tool. */
 export const connectHow = (client) =>
   client === 'codex'
     ? "the Parly plugin's connect skill with the hub's address"
-    : ['vscode', 'cline', 'cline-cli', 'cursor', 'antigravity'].includes(client)
+    : ['vscode', 'cline', 'cline-cli', 'cursor', 'antigravity', 'opencode'].includes(client)
       ? "the Parly `connect` tool with the hub's address"
       : '/parly:connect <hub address>';
 
