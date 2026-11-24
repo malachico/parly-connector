@@ -269,7 +269,8 @@ export async function runSession(client, meta, settings, name, logFile, exec = s
     if (!meta.session) meta.session = randomUUID();
     args = ['-p', '--output-format', 'json', '--permission-mode', settings.permissionMode, resume ? '--resume' : '--session-id', meta.session, prompt];
   }
-  const r = await exec(bin, args, { cwd, env: client === 'cursor' ? env : { ...env, CLAUDE_CODE_AUTO_COMPACT_WINDOW: AUTO_COMPACT_WINDOW }, encoding: 'utf8', timeout: RUN_TIMEOUT_MS, maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
+  // background tasks keep `claude -p` alive after its turn ends, so the conversation stays busy and new @mentions queue for up to RUN_TIMEOUT_MS
+  const r = await exec(bin, args, { cwd, env: client === 'cursor' ? env : { ...env, CLAUDE_CODE_AUTO_COMPACT_WINDOW: AUTO_COMPACT_WINDOW, CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: '1' }, encoding: 'utf8', timeout: RUN_TIMEOUT_MS, maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
   log(String(r.stdout ?? '') + String(r.stderr ?? ''));
   let out;
   try {
