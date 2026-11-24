@@ -230,7 +230,9 @@ export async function runSession(client, meta, settings, name, logFile, exec = s
     `When you do change a repo's files, work in a worktree at ${wt}/<repo-name> rather than the main checkout: "git worktree add" it with "-b <branch>" the first time, and if that path is gone on a later turn re-add the worktree on its existing branch ("git worktree add <path> <branch>", no -b). ` +
     'Before using a skill or process Parly lists, load it with get_skill(id). ' +
     'When a message gives you a task, work it through to completion: settle what done means, do it, check the result works the way the person will use it, and fix what falls short. ' +
-    'One reply is not the end of the task: post short progress replies along the way, and stop only when the task is complete, or blocked on a question that needs an answer before you can go on.' +
+    'One reply is not the end of the task: post short progress replies along the way, and stop only when the task is complete, or blocked on a decision only a person can make. ' +
+    'Waiting on a review, CI or another agent is not blocked: a reviewer that fails or runs out of usage gets retried or replaced. ' +
+    `Before you end a turn with the task still open, schedule_message a once check-back in this conversation for when the wait should be over, with @${name} in its text so it wakes you.` +
     (siblings
       ? "\n\nYour other sessions (you, in other conversations) are on these; if this conversation touches one, read it (read_thread, or read the DM) before acting, and don't redo or contradict its work:\n" + siblings
       : '');
