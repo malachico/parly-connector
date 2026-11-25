@@ -280,6 +280,13 @@ export async function runSession(client, meta, settings, name, logFile, exec = s
   if (r.status !== 0 || !out || out.is_error) {
     // A session that can't be resumed (deleted, another machine) starts over next time.
     if (resume && cantResume(String(r.stderr ?? '') + String(out?.result ?? ''))) delete meta.session;
+    // A Claude session too big to compact fails every turn (autocompact_thrashing): start over and answer from a fresh one.
+    // ponytail: resets on that failure only; add a size/age cap if sessions start thrashing unnoticed.
+    if (resume && client === 'claude-code' && /autocompact_thrashing/i.test(String(r.stderr ?? '') + String(out?.result ?? ''))) {
+      delete meta.session;
+      delete meta.siblings;
+      return runSession(client, meta, settings, name, logFile, exec);
+    }
     if (client === 'cursor' && /log ?in|authenticat/i.test(String(r.stderr ?? '') + String(r.stdout ?? ''))) return { ok: false, problem: "Cursor's agent CLI isn't signed in on this machine: run `agent login`" };
     return { ok: false, problem: out?.result || (r.error ? r.error.message : `${client === 'cursor' ? 'agent' : 'claude'} exited with ${r.status}`) };
   }
